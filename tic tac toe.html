@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tic Tac Toe Web App</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: linear-gradient(135deg, #6dd5ed, #2193b0);
+      font-family: "Poppins", sans-serif;
+    }
+    .container {
+      text-align: center;
+      background: white;
+      padding: 25px 35px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+    h1 {
+      margin-bottom: 20px;
+      font-size: 2rem;
+      color: #333;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 8px;
+      margin: 20px auto;
+    }
+    .cell {
+      background: #fdfdfd;
+      border: 2px solid #444;
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2.5rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .cell:hover {
+      background: #f1f1f1;
+      transform: scale(1.05);
+    }
+    .cell.taken {
+      pointer-events: none;
+    }
+    .cell.x {
+      color: #e63946; /* red ❌ */
+    }
+    .cell.o {
+      color: #1d3557; /* blue ⭕ */
+    }
+    .cell.win {
+      background: #ffd166 !important;
+      transform: scale(1.1);
+      box-shadow: 0 0 15px #ffd166;
+    }
+    .status {
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+      color: #333;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      background: #457b9d;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #1d3557;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎮 Tic Tac Toe</h1>
+    <div class="status">Player ❌'s turn</div>
+    <div class="board" id="board">
+      <div class="cell" data-index="0"></div>
+      <div class="cell" data-index="1"></div>
+      <div class="cell" data-index="2"></div>
+      <div class="cell" data-index="3"></div>
+      <div class="cell" data-index="4"></div>
+      <div class="cell" data-index="5"></div>
+      <div class="cell" data-index="6"></div>
+      <div class="cell" data-index="7"></div>
+      <div class="cell" data-index="8"></div>
+    </div>
+    <button id="reset">🔄 Reset Game</button>
+  </div>
+
+  <script>
+    const board = document.getElementById("board");
+    const cells = document.querySelectorAll(".cell");
+    const statusText = document.querySelector(".status");
+    const resetBtn = document.getElementById("reset");
+
+    let currentPlayer = "X";
+    let gameActive = true;
+    let gameState = ["", "", "", "", "", "", "", "", ""];
+
+    const icons = {
+      X: "❌",
+      O: "⭕"
+    };
+
+    const winningConditions = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6]
+    ];
+
+    function handleCellClick(e) {
+      const cell = e.target;
+      const index = cell.getAttribute("data-index");
+
+      if (gameState[index] !== "" || !gameActive) return;
+
+      gameState[index] = currentPlayer;
+      cell.textContent = icons[currentPlayer];
+      cell.classList.add("taken", currentPlayer.toLowerCase());
+
+      checkWinner();
+    }
+
+    function checkWinner() {
+      let roundWon = false;
+      let winningCombo = [];
+
+      for (let condition of winningConditions) {
+        const [a, b, c] = condition;
+        if (gameState[a] && gameState[a] === gameState[b] && gameState[a] === gameState[c]) {
+          roundWon = true;
+          winningCombo = condition;
+          break;
+        }
+      }
+
+      if (roundWon) {
+        statusText.textContent = `🎉 Player ${icons[currentPlayer]} Wins!`;
+        gameActive = false;
+        highlightWinningCells(winningCombo);
+        return;
+      }
+
+      if (!gameState.includes("")) {
+        statusText.textContent = "🤝 It's a Draw!";
+        gameActive = false;
+        return;
+      }
+
+      currentPlayer = currentPlayer === "X" ? "O" : "X";
+      statusText.textContent = `Player ${icons[currentPlayer]}'s turn`;
+    }
+
+    function highlightWinningCells(combo) {
+      combo.forEach(index => {
+        cells[index].classList.add("win");
+      });
+    }
+
+    function resetGame() {
+      currentPlayer = "X";
+      gameActive = true;
+      gameState = ["", "", "", "", "", "", "", "", ""];
+      statusText.textContent = `Player ${icons[currentPlayer]}'s turn`;
+      cells.forEach(cell => {
+        cell.textContent = "";
+        cell.className = "cell"; // reset classes
+      });
+    }
+
+    cells.forEach(cell => cell.addEventListener("click", handleCellClick));
+    resetBtn.addEventListener("click", resetGame);
+  </script>
+</body>
+</html>
